@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 import shutil
-import zipfile
+import tarfile
 import signal
 import time
 import re
@@ -12,7 +12,7 @@ from servicemanager import subprocess
 from smservice import SmService, SmMicroServiceStarter, SmServiceStatus
 from servicemanager.smprocess import SmProcess
 from servicemanager.smfile import force_chdir, force_pushdir, remove_if_exists, remove_folder_if_exists, makedirs_if_not_exists
-from servicemanager.smnexus import SmNexus
+from servicemanager.smnpm import SmNpm
 from servicemanager.smrepo import clone_repo_if_requred
 
 
@@ -39,10 +39,10 @@ class SmPythonServiceStarter(SmMicroServiceStarter):
         force_chdir(assets_target_path)
 
         if not self.context.offline:
-            nexus = SmNexus(self.context, self.service_name)
-            versions = nexus.get_all_versions(self.version, self.run_from)
+            npm = SmNpm(self.context, self.service_name)
+            versions = npm.get_all_versions()
             for version in versions:
-                nexus.download_jar_if_necessary(self.run_from, version)
+                npm.download_if_necessary(version)
             self._unzip_assets(versions)
 
         cmd_with_params = self.service_data["binary"]["cmd"]
@@ -87,12 +87,14 @@ class SmPythonServiceStarter(SmMicroServiceStarter):
             os.makedirs(unzipped_dir)
 
         for version in versions:
-            zip_filename = service_data["binary"]["artifact"] + "-" + version + ".zip"
+            zip_filename = service_data["binary"]["artifact"] + "-" + version + ".tgz"
             extracted_dir = version
             if not os.path.exists(assets_zip_path + "/assets/" + extracted_dir):
-                os.makedirs(extracted_dir)
-                zipfile.ZipFile(zip_filename, 'r').extractall(extracted_dir)
-                shutil.move(extracted_dir, unzipped_dir)
+                print zip_filename
+                tarfile.TarFile.open(zip_filename, 'r').extractall(unzipped_dir)
+                os.chdir(assets_zip_path + "/" + unzipped_dir)
+                shutil.move("package", version)
+                os.chdir(assets_zip_path)
         target_dir = unzipped_dir
         return target_dir
 

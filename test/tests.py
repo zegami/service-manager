@@ -82,6 +82,31 @@ class TestNexus(unittest.TestCase):
         self.assertEqual(context.get_service("FAKE_NEXUS").status(), [])
 
 
+class TestNpm(unittest.TestCase):
+    def setUp(self):
+        set_up_and_clean_workspace()
+
+    def test_npm(self):
+        config_dir_override = os.path.join(os.path.dirname(__file__), "conf")
+
+        # start fake npm
+        context = SmContext(SmApplication(config_dir_override), None, False, False)
+        response1 = actions.start_one(context, "FAKE_NPM", True, False, None, port=None)
+        self.assertIsNotNone(context.get_service("FAKE_NPM").status())
+        time.sleep(5)
+
+        context = SmContext(SmApplication(config_dir_override), None, False, False)
+        servicetostart = "PYTHON_SIMPLE_SERVER_ASSETS_FRONTEND"
+        actions.start_one(context, servicetostart, True, False, None, port=None)
+        self.assertIsNotNone(context.get_service(servicetostart).status())
+        context.kill(servicetostart)
+
+        context.kill("FAKE_NPM")
+
+        self.assertEqual(context.get_service(servicetostart).status(), [])
+        self.assertEqual(context.get_service("FAKE_NPM").status(), [])
+
+
 class TestActions(unittest.TestCase):
     def setUp(self):
         set_up_and_clean_workspace()
@@ -199,25 +224,25 @@ class TestActions(unittest.TestCase):
         context = SmContext(SmApplication(config_dir_override), None, False, False)
         context.kill_everything()
 
-        context.kill("FAKE_NEXUS")
-        self.assertEqual(context.get_service("FAKE_NEXUS").status(), [])
+        context.kill("FAKE_NPM")
+        self.assertEqual(context.get_service("FAKE_NPM").status(), [])
         time.sleep(2)
 
-        # start fake nexus
-        self.assertEqual(context.get_service("FAKE_NEXUS").status(), [])
-        response1 = actions.start_one(context, "FAKE_NEXUS", True, False, None, port=None)
+        # start fake npm
+        self.assertEqual(context.get_service("FAKE_NPM").status(), [])
+        response1 = actions.start_one(context, "FAKE_NPM", True, False, None, port=None)
         self.assertTrue(response1)
-        self.assertIsNotNone(context.get_service("FAKE_NEXUS").status())
+        self.assertIsNotNone(context.get_service("FAKE_NPM").status())
         time.sleep(5)
 
         actions.start_one(context, "PYTHON_SIMPLE_SERVER_ASSETS_FRONTEND", True, False, None, port=None)
         self.assertIsNotNone(context.get_service("PYTHON_SIMPLE_SERVER_ASSETS_FRONTEND").status())
         context.kill("PYTHON_SIMPLE_SERVER_ASSETS_FRONTEND")
-        context.kill("FAKE_NEXUS")
+        context.kill("FAKE_NPM")
         time.sleep(15)
 
         self.assertEqual(context.get_service("PYTHON_SIMPLE_SERVER_ASSETS_FRONTEND").status(), [])
-        self.assertEqual(context.get_service("FAKE_NEXUS").status(), [])
+        self.assertEqual(context.get_service("FAKE_NPM").status(), [])
 
     def test_wait_on_assets_server(self):
         config_dir_override = os.path.join(os.path.dirname(__file__), "conf")
@@ -226,25 +251,25 @@ class TestActions(unittest.TestCase):
         service_resolver = ServiceResolver(sm_application)
         context.kill_everything()
 
-        context.kill("FAKE_NEXUS")
-        self.assertEqual(context.get_service("FAKE_NEXUS").status(), [])
+        context.kill("FAKE_NPM")
+        self.assertEqual(context.get_service("FAKE_NPM").status(), [])
         time.sleep(2)
 
         # start fake nexus
-        self.assertEqual(context.get_service("FAKE_NEXUS").status(), [])
-        response1 = actions.start_one(context, "FAKE_NEXUS", True, False, None, port=None)
+        self.assertEqual(context.get_service("FAKE_NPM").status(), [])
+        response1 = actions.start_one(context, "FAKE_NPM", True, False, None, port=None)
         self.assertTrue(response1)
-        self.assertIsNotNone(context.get_service("FAKE_NEXUS").status())
+        self.assertIsNotNone(context.get_service("FAKE_NPM").status())
         time.sleep(5)
 
         actions.start_and_wait(service_resolver, context, ["PYTHON_SIMPLE_SERVER_ASSETS_FRONTEND"], True, False, None, port=None, seconds_to_wait=5)
         self.assertIsNotNone(context.get_service("PYTHON_SIMPLE_SERVER_ASSETS_FRONTEND").status())
         context.kill("PYTHON_SIMPLE_SERVER_ASSETS_FRONTEND")
-        context.kill("FAKE_NEXUS")
+        context.kill("FAKE_NPM")
         time.sleep(15)
 
         self.assertEqual(context.get_service("PYTHON_SIMPLE_SERVER_ASSETS_FRONTEND").status(), [])
-        self.assertEqual(context.get_service("FAKE_NEXUS").status(), [])
+        self.assertEqual(context.get_service("FAKE_NPM").status(), [])
 
     def test_python_server_offline(self):
         config_dir_override = os.path.join(os.path.dirname(__file__), "conf")
@@ -506,7 +531,7 @@ class TestConfiguration(unittest.TestCase):
     def test_config(self):
         config_dir_override = os.path.join(os.path.dirname(__file__), "conf")
         application = SmApplication(config_dir_override, None)
-        self.assertEqual(len(application.services), 9)
+        self.assertEqual(len(application.services), 10)
         self.assertEqual(application.services["TEST_TEMPLATE"]["type"], "external")
         self.assertEqual(application.services["TEST_TEMPLATE"]["pattern"], "some.namespace=TEST_TEMPLATE")
         self.assertEqual(application.services["TEST_TEMPLATE"]["includeInStartAndStopAll"], False)
@@ -537,7 +562,7 @@ class TestServiceResolver(unittest.TestCase):
         self.assertTrue("DROPWIZARD_NEXUS_END_TO_END_TEST" in all_services)
         self.assertTrue("PLAY_NEXUS_END_TO_END_TEST" in all_services)
         self.assertTrue("PYTHON_SIMPLE_SERVER_ASSETS_FRONTEND" in all_services)
-        self.assertEqual(9, len(all_services))
+        self.assertEqual(10, len(all_services))
 
         test_profile = service_resolver.resolve_services("TEST")
         self.assertTrue("TEST_ONE" in test_profile)

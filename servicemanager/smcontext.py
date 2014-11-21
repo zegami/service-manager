@@ -66,6 +66,7 @@ class SmApplication():
         self.merge_template_config()
 
         self.nexus_repo_host = SmApplication._read_json_config(self, "config.json")["nexus"]["host"]
+        self.npm_repo_host = SmApplication._read_json_config(self, "config.json")["npm"]["host"]
         self.play_extraction_dir = SmApplication._read_json_config(self, "config.json")["playExtractionDir"]
         self.service_mappings = SmApplication._read_json_config(self, "service_mappings.json")
         self.features = features
@@ -241,8 +242,10 @@ class SmContext():
         return self.application.workspace + data["location"] + "/target/"
 
     def _create_extension(self, service_name, run_from):
-        if self.service_type(service_name) == "play" or self.service_type(service_name) == "assets":
+        if self.service_type(service_name) == "play":
             return ".zip"
+        elif self.service_type(service_name) == "assets":
+            return ".tgz"
         else:
             return "-%s-shaded.jar" % run_from
 

@@ -38,7 +38,7 @@ class SmNexus():
         sys.stdout.flush()
 
     def _create_nexus_extension(self):
-        if self.service_type == "play" or self.service_type == "assets":
+        if self.service_type == "play":
             return ".zip"
         else:
             return "-shaded.jar"
@@ -164,6 +164,9 @@ class SmNexus():
             group_id = binary["groupId"]
             nexus_url = nexus_host + binary["nexus"] + url_type_repository + "/" + group_id + artifact + "/" + version + "/"
             #first download the md5 file in order to determine if new artifact download is required
+            print nexus_url + md5_filename
+            print microservice_target_path + md5_filename
+
             self._download_from_nexus(nexus_url + md5_filename, microservice_target_path + md5_filename, False)
             if self.service_type == "assets":
                 if self._md5_if_exists(microservice_target_path + nexus_filename) != open(microservice_target_path + md5_filename, 'r').read():

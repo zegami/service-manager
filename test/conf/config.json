@@ -1,11 +1,15 @@
 {
 	"nexus" : {
-	        "protocol" : "http",
-            "host": "localhost:8060",
-            "repoMappings" : {
-                "RELEASE" : "foo-releases",
-                "SNAPSHOT" : "foo-snapshots"
-             }
+		"protocol" : "http",
+		"host": "localhost:8060",
+		"repoMappings" : {
+			"RELEASE" : "foo-releases",
+			"SNAPSHOT" : "foo-snapshots"
+		 }
+	},
+	"npm" : {
+		"protocol" : "http",
+		"host": "localhost:8061"
 	},
 	"playExtractionDir" : "/var/tmp"
 }

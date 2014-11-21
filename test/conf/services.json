@@ -8,10 +8,24 @@
             "fakenexus.py"
         ],
         "healthcheck": {
-            "url": "http://localhost:8060/ping",
+                "url": "http://localhost:8060/ping",
             "response": "pong"
         },
         "pattern": ".*fakenexus.*"
+    },
+    "FAKE_NPM": {
+        "name": "Simple file server",
+        "type": "external",
+        "location": "../",
+        "cmd": [
+            "python",
+            "fakenpm.py"
+        ],
+        "healthcheck": {
+            "url": "http://localhost:8061/ping",
+            "response": "pong"
+        },
+        "pattern": ".*fakenpm.*"
     },
     "TEST_ONE": {
         "name": "Test service one",
@@ -187,10 +201,7 @@
             "repo": "foo@foo.com"
         },
         "binary": {
-            "artifact": "assets-frontend",
-            "groupId":"foo/bar/foo/",
-            "nexus": "/content/repositories/",
-            "nexus-api": "/service/local/repositories/",
+            "artifact": "hmrc-assets-frontend",
             "destinationSubdir": "assets-frontend",
             "cmd": [
                 "python -m SimpleHTTPServer 9032"
